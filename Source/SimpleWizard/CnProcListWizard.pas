@@ -288,6 +288,10 @@ type
     procedure RefreshDropBox(Sender: TObject);
     procedure DropDownListDblClick(Sender: TObject);
     procedure DropDownListClick(Sender: TObject);
+{$IFDEF LAZARUS}
+    procedure DropDownListMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Integer);
+{$ENDIF}
     procedure UpdateDropPosition;
 {$IFDEF IDE_SUPPORT_THEMING}
     procedure ThemeChanged(Sender: TObject);
@@ -796,7 +800,12 @@ begin
 
       // 有待选中条目，则选中其上一个，UpdateDisplay 会再下移一个条目
       if Idx >= 1 then
+{$IFDEF LAZARUS}
+        // 虚拟列表下 LCL 的 ItemIndex 赋值会因 Items 为空抛异常，走原生回退
+        ClassCombo.DropDownList.SelectItem(Idx - 1);
+{$ELSE}
         ClassCombo.DropDownList.ItemIndex := Idx - 1;
+{$ENDIF}
 
       ClassCombo.ShowDropBox;
     end;
@@ -1910,7 +1919,12 @@ begin
 
       // 有待选中条目，则选中其上一个，UpdateDisplay 会再下移一个条目
       if Idx >= 1 then
+{$IFDEF LAZARUS}
+        // 虚拟列表下 LCL 的 ItemIndex 赋值会因 Items 为空抛异常，走原生回退
+        ProcCombo.DropDownList.SelectItem(Idx - 1);
+{$ELSE}
         ProcCombo.DropDownList.ItemIndex := Idx - 1;
+{$ENDIF}
 
       ProcCombo.ShowDropBox;
     end;
@@ -4484,6 +4498,12 @@ begin
   if FComboToSearch = nil then
     Exit;
 
+{$IFDEF LAZARUS}
+  // 虚拟列表下 LCL 的 ItemIndex 恒为 -1，直接读原生选中项
+  Idx := FComboToSearch.DropDownList.GetCurSel;
+  if Idx >= FComboToSearch.DropDownList.DisplayItems.Count then
+    Idx := -1;
+{$ELSE}
   Idx := FComboToSearch.DropDownList.ItemIndex;
   if Idx = -1 then
   begin
@@ -4496,7 +4516,8 @@ begin
       end;
     end;
   end;
-      
+{$ENDIF}
+
   if Idx = -1 then
     Idx := FComboToSearch.DropDownList.DisplayItems.IndexOf(FComboToSearch.Text);
   if Idx >= 0 then
@@ -4849,13 +4870,22 @@ begin
   inherited;
   if Shift = [] then
   begin
+{$IFDEF LAZARUS}
+    // 虚拟列表脱离父链后 LCL 的 ItemAtPos 不可靠，按行高与 TopIndex 换算
+    Index := IndexFromPoint(X, Y, FDisplayItems.Count);
+{$ELSE}
     Index := ItemAtPos(Point(X, Y), True);
+{$ENDIF}
     if Index <> FLastItem then
     begin
       FLastItem := Index;
       Application.CancelHint;
       if Index >= 0 then
       begin
+{$IFDEF LAZARUS}
+        // 虚拟列表下 LCL 的 Selected/ItemIndex 不可靠，直接走原生消息
+        SelectItem(Index);
+{$ELSE}
         try
           Selected[Index] := True;
         except
@@ -4866,6 +4896,7 @@ begin
             ;
           end;
         end;
+{$ENDIF}
         Application.ActivateHint(ClientToScreen(Point(X, Y)));
       end;
     end;
@@ -5068,6 +5099,11 @@ begin
   FDropDownList.Parent := Application.MainForm;
   FDropDownList.OnDblClick := DropDownListDblClick;
   FDropDownList.OnClick := DropDownListClick;
+{$IFDEF LAZARUS}
+  // 虚拟列表脱离父链后 LCL 的选中同步与 OnClick 事件链都不可靠，
+  // 按下左键时直接按坐标处理跳转
+  FDropDownList.OnMouseDown := DropDownListMouseDown;
+{$ENDIF}
 {$IFDEF DELPHI_OTA}
   CnWizNotifierServices.AddApplicationMessageNotifier(ApplicationMessage);
 {$IFDEF IDE_SUPPORT_THEMING}
@@ -5122,7 +5158,11 @@ end;
 
 procedure TCnProcListComboBox.DropDownListDblClick(Sender: TObject);
 begin
+{$IFDEF LAZARUS}
+  // Lazarus 下跳转已在 OnMouseDown 中处理，双击不再响应，防止重复定位
+{$ELSE}
   PostMessage(Handle, WM_KEYDOWN, VK_RETURN, 0);
+{$ENDIF}
 end;
 
 procedure TCnProcListComboBox.DropDownListClick(Sender: TObject);
@@ -5130,13 +5170,11 @@ begin
 {$IFDEF DEBUG}
   CnDebugger.LogMsg('TCnProcListComboBox.DropDownListClick');
 {$ENDIF}
-
-{$IFNDEF LAZARUS}
-  // Lazarus 下浮窗列表被 SetParent 摘出到桌面层，键盘选中导致的
-  // LBN_SELCHANGE 通知发给桌面窗口而丢失，FDisableClickFlag 设了
-  // 也没有自动 Click 来消耗它，反而会吞掉用户的第一次真实点击。
-  // LCL 下 OnClick 只由真实鼠标点击触发，无需屏蔽。
-
+{$IFDEF LAZARUS}
+  // Lazarus 下跳转已在 OnMouseDown 中按坐标直接处理，此处无需再响应；
+  // OnClick 在脱离父链的虚拟列表上时序不可靠，不能照搬 Delphi 的
+  // FDisableClickFlag 屏蔽与 ItemIndex 判断逻辑
+{$ELSE}
   if FDropDownList.FDisableClickFlag then
   begin
     // 屏蔽一次单击下拉触发事件
@@ -5147,11 +5185,36 @@ begin
     Exit;
   end;
 
-{$ENDIF}
-
   if FDropDownList.ItemIndex >= 0 then
     PostMessage(Handle, WM_KEYDOWN, VK_RETURN, 0);
+{$ENDIF}
 end;
+
+{$IFDEF LAZARUS}
+
+procedure TCnProcListComboBox.DropDownListMouseDown(Sender: TObject;
+  Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+var
+  Idx: Integer;
+begin
+  // 浮窗列表脱离父链后 LCL 的 OnClick 时序、ItemIndex 与客户区缓存均不可靠，
+  // 按下左键时直接按坐标（TopIndex + 行高）计算条目并执行跳转流程
+  if (Button <> mbLeft) or not FDropDownList.Visible then
+    Exit;
+
+  Idx := FDropDownList.TopIndex + Y div Max(1, FDropDownList.ItemHeight);
+  if (Y < 0) or (Idx < 0) or (Idx >= FDropDownList.DisplayItems.Count) then
+    Exit;
+
+  // 显式同步原生选中项，供 DoIdleComboChange 取跳转目标
+  FDropDownList.SelectItem(Idx);
+  FWizard.FComboToSearch := Self;
+  CnWizNotifierServices.ExecuteOnApplicationIdle(FWizard.DoIdleComboChange);
+  FDropDownList.Hide;
+  FDropDownList.SavePosition;
+end;
+
+{$ENDIF}
 
 procedure TCnProcListComboBox.KeyDown(var Key: Word; Shift: TShiftState);
 begin

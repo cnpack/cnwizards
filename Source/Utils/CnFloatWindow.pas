@@ -98,6 +98,7 @@ type
     procedure ScrollByWheel(WheelDelta, ItemCount: Integer);
     function IndexFromPoint(X, Y, ItemCount: Integer): Integer;
     procedure SelectItem(Index: Integer);
+    function GetCurSel: Integer;
 {$ENDIF}
 
     property UseEditorColor: Boolean read FUseEditorColor write SetUseEditorColor;
@@ -128,6 +129,7 @@ const
 {$IFDEF FPC}
   csWheelScrollLines = 3;         // 浮窗列表一次滚轮滚动的行数
   csLBSetCurSel = $0186;          // LB_SETCURSEL，避免依赖不同 widgetset 的常量定义
+  csLBGetCurSel = $0188;          // LB_GETCURSEL，同上
 {$ENDIF}
 
 type
@@ -363,6 +365,15 @@ begin
     SendMessage(Handle, csLBSetCurSel, Index, 0);
     Invalidate;
   end;
+end;
+
+function TCnFloatListBox.GetCurSel: Integer;
+begin
+  // 虚拟列表（LBS_NODATA）下 LCL 的 ItemIndex 会因 Items 为空被钳制为 -1，
+  // 这里直接读原生选中项，返回真实的当前条目序号
+  Result := -1;
+  if HandleAllocated then
+    Result := SendMessage(Handle, csLBGetCurSel, 0, 0);
 end;
 
 procedure TCnFloatListBox.ScrollByWheel(WheelDelta, ItemCount: Integer);
