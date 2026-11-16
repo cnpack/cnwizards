@@ -130,6 +130,7 @@ const
   csWheelScrollLines = 3;         // 浮窗列表一次滚轮滚动的行数
   csLBSetCurSel = $0186;          // LB_SETCURSEL，避免依赖不同 widgetset 的常量定义
   csLBGetCurSel = $0188;          // LB_GETCURSEL，同上
+  csExNoActivate = $08000000;     // WS_EX_NOACTIVATE，同上
 {$ENDIF}
 
 type
@@ -275,7 +276,12 @@ begin
   Params.Style := (Params.Style or WS_CHILDWINDOW or WS_SIZEBOX or WS_MAXIMIZEBOX
     or LBS_NODATA or LBS_OWNERDRAWFIXED) and not (LBS_SORT or LBS_HASSTRINGS);
   Params.ExStyle := WS_EX_TOOLWINDOW or WS_EX_WINDOWEDGE;
-
+{$IFDEF FPC}
+  // LCL 下浮窗显示/点击可能激活自身抢走系统焦点，导致下拉期间按键
+  // 进不了组合框；加 WS_EX_NOACTIVATE 使浮窗永不成为活动窗口，
+  // 鼠标消息仍正常送达本控件
+  Params.ExStyle := Params.ExStyle or csExNoActivate;
+{$ENDIF}
   AdjustShadowParam(Params, ClassName);
 end;
 

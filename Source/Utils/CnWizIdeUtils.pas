@@ -3212,9 +3212,21 @@ var
 begin
   ShiftState := KeyDataToShiftState(Message.KeyData);
   AShortCut := ShortCut(Message.CharCode, ShiftState);
-  Message.Result := 1;
-  if not HandleEditShortCut(Self, AShortCut) then
+  if HandleEditShortCut(Self, AShortCut) then
+    Message.Result := 1
+  else
+  begin
+{$IFDEF LAZARUS}
+    // LCL 的 win32callback 依据 WM_KEYDOWN 的 Result 决定是否丢弃后续的
+    // WM_CHAR（IgnoreNextCharWindow 机制）：Result 非 0 时 TranslateMessage
+    // 生成的 WM_CHAR 会被直接丢弃，字符永远进不了编辑框。普通字符键必须
+    // 返回 0 让 WM_CHAR 正常送达原生编辑控件
+    Message.Result := 0;
+{$ELSE}
+    Message.Result := 1;
+{$ENDIF}
     inherited;
+  end;
 end;
 
 //==============================================================================
