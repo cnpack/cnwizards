@@ -77,7 +77,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Controls, Forms, Dialogs, ActnList,
-  {$IFDEF LAZARUS} LCLProc, IDECommands, MenuIntf, {$ENDIF}
+  {$IFDEF LAZARUS} LCLProc, IDECommands, MenuIntf, LazIDEIntf, CompOptsIntf, {$ENDIF}
   {$IFDEF DELPHI_OTA} ToolsAPI, {$ENDIF} IniFiles, ShellAPI, Menus, FileCtrl,
   {$IFDEF BDS} Variants, {$ENDIF} ComCtrls, {$IFDEF DELPHIXE3_UP} Actions,{$ENDIF}
   CnCommon, CnWizClasses, CnWizUtils, CnConsts, CnWizConsts, CnProjectViewUnitsFrm,
@@ -98,9 +98,11 @@ type
 
   TCnProjectExtWizard = class(TCnSubMenuWizard)
   private
+    IdBuildAndRun: Integer;
   {$IFNDEF BDS}
     IdRunSeparately: Integer;
   {$ENDIF}
+    IdBuildRunSeparately: Integer;
     IdExploreProject: Integer;
     IdExploreUnit: Integer;
     IdExploreExe: Integer;
@@ -151,6 +153,10 @@ type
     procedure RunSeparately;
   {$ENDIF}
 {$ENDIF}
+    procedure BuildAndRun;
+    {* 构建当前工程后运行}
+    procedure BuildRunSeparately;
+    {* 构建当前工程后脱离 IDE 单独运行}
     procedure ExploreProject;
     procedure ExploreUnit;
     procedure ExploreExe;
@@ -226,6 +232,9 @@ uses
   {$ENDIF};
 
 const
+  // IDE 的运行（F9）命令 Action 名称
+  csIDERunCommand = 'RunRunCommand';
+
 {$IFDEF WIN64}
   SCnViewDialogExecuteName = '_ZN7Viewdlg11TViewDialog7ExecuteEv';
 {$ELSE}
@@ -497,6 +506,113 @@ end;
 {$ENDIF}
 {$ENDIF}
 
+{$IFDEF DELPHI_OTA}
+
+procedure TCnProjectExtWizard.BuildAndRun;
+var
+  Project: IOTAProject;
+  ProjectBuilder: IOTAProjectBuilder;
+  RunAction: TContainedAction;
+begin
+  Project := CnOtaGetCurrentProject;
+  if not Assigned(Project) then
+    Exit;
+
+  // 构建当前工程，等待完成，失败则中止
+  ProjectBuilder := Project.GetProjectBuilder;
+  if ProjectBuilder.ShouldBuild and (not ProjectBuilder.BuildProject(cmOTAMake, True)) then
+    Exit;
+
+  // 构建成功后调用 IDE 的运行命令
+  RunAction := FindIDEAction(csIDERunCommand);
+  if RunAction <> nil then
+    RunAction.Execute;
+end;
+
+procedure TCnProjectExtWizard.BuildRunSeparately;
+var
+  Project: IOTAProject;
+  ProjectBuilder: IOTAProjectBuilder;
+  HostApp, RunParams: Variant;
+  Params, OutputDir, ExeName: string;
+begin
+  Project := CnOtaGetCurrentProject;
+  if not Assigned(Project) then
+    Exit;
+
+  // 构建当前工程，等待完成，失败则中止
+  ProjectBuilder := Project.GetProjectBuilder;
+  if ProjectBuilder.ShouldBuild and (not ProjectBuilder.BuildProject(cmOTAMake, True)) then
+    Exit;
+
+  // 取 Host 程序
+  if CnOtaGetActiveProjectOption('HostApplication', HostApp) then
+    ExeName := ReplaceToActualPath(HostApp, Project);
+
+  // 取运行参数
+  CnOtaGetActiveProjectOption('RunParams', RunParams);
+  Params := RunParams;
+
+  // 无宿主程序
+  if ExeName = '' then
+  begin
+    OutputDir := CnOtaGetProjectOutputDirectory(Project);
+    ExeName := MakePath(OutputDir) + _CnChangeFileExt(_CnExtractFileName(Project.GetFileName), '.exe');
+  end;
+
+  // 脱离 IDE 执行程序
+  if FileExists(ExeName) then
+    ShellExecute(0, 'open', PChar(ExeName), PChar(Params),
+      PChar(_CnExtractFileDir(ExeName)), SW_SHOWNORMAL)
+  else
+    InfoDlg(SCnProjExtBuildRunSeparatelyNoTarget);
+end;
+
+{$ENDIF}
+
+{$IFDEF LAZARUS}
+
+procedure TCnProjectExtWizard.BuildAndRun;
+begin
+  if CnOtaGetCurrentProject = nil then
+    Exit;
+
+  // 构建当前工程，失败则中止
+  if LazarusIDE.DoBuildProject(crCompile, []) <> mrOk then
+    Exit;
+
+  // 构建成功后调用 IDE 的运行命令
+  LazarusIDE.DoRunProject;
+end;
+
+procedure TCnProjectExtWizard.BuildRunSeparately;
+var
+  Project: TCnIDEProjectInterface;
+  Target: string;
+begin
+  Project := CnOtaGetCurrentProject;
+  if Project = nil then
+    Exit;
+
+  // 构建当前工程，失败则中止
+  if LazarusIDE.DoBuildProject(crCompile, []) <> mrOk then
+    Exit;
+
+  // 构建成功后取得输出目标，脱离 IDE 单独运行
+  Target := CnOtaGetProjectOutputTarget(Project);
+{$IFDEF DEBUG}
+  CnDebugger.LogMsg('BuildRunSeparately Target: ' + Target);
+{$ENDIF}
+
+  if (Target <> '') and FileExists(Target) then
+    ShellExecute(0, 'open', PChar(Target), nil,
+      PChar(_CnExtractFileDir(Target)), SW_SHOWNORMAL)
+  else
+    InfoDlg(SCnProjExtBuildRunSeparatelyNoTarget);
+end;
+
+{$ENDIF}
+
 //------------------------------------------------------------------------------
 // Action 处理
 //------------------------------------------------------------------------------
@@ -508,10 +624,18 @@ begin
   IdRunSeparately := RegisterASubAction(SCnProjExtRunSeparately,
     SCnProjExtRunSeparatelyCaption, ShortCut(VK_F9, [ssShift]),
     SCnProjExtRunSeparatelyHint, SCnProjExtRunSeparately);
+{$ENDIF}
+{$ENDIF}
+
+  IdBuildAndRun := RegisterASubAction(SCnProjExtBuildAndRun,
+    SCnProjExtBuildAndRunCaption, 0,
+    SCnProjExtBuildAndRunHint, SCnProjExtBuildAndRun);
+
+  IdBuildRunSeparately := RegisterASubAction(SCnProjExtBuildRunSeparately,
+    SCnProjExtBuildRunSeparatelyCaption, 0,
+    SCnProjExtBuildRunSeparatelyHint, SCnProjExtBuildRunSeparately);
 
   AddSepMenu;
-{$ENDIF}
-{$ENDIF}
 
   IdExploreUnit := RegisterASubAction(SCnProjExtExploreUnit,
     SCnProjExtExploreUnitCaption, 0,
@@ -589,7 +713,11 @@ begin
   else
 {$ENDIF}
 {$ENDIF}
-  if Index = IdExploreUnit then
+  if Index = IdBuildAndRun then
+    BuildAndRun
+  else if Index = IdBuildRunSeparately then
+    BuildRunSeparately
+  else if Index = IdExploreUnit then
     ExploreUnit
   else if Index = IdExploreProject then
     ExploreProject

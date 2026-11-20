@@ -1099,8 +1099,13 @@ begin
   TranslateStr(SCnProjExtWizardCaption, 'SCnProjExtWizardCaption');
   TranslateStr(SCnProjExtWizardHint, 'SCnProjExtWizardHint');
   TranslateStr(SCnProjExtWizardComment, 'SCnProjExtWizardComment');
+  TranslateStr(SCnProjExtBuildAndRunCaption, 'SCnProjExtBuildAndRunCaption');
+  TranslateStr(SCnProjExtBuildAndRunHint, 'SCnProjExtBuildAndRunHint');
   TranslateStr(SCnProjExtRunSeparatelyCaption, 'SCnProjExtRunSeparatelyCaption');
   TranslateStr(SCnProjExtRunSeparatelyHint, 'SCnProjExtRunSeparatelyHint');
+  TranslateStr(SCnProjExtBuildRunSeparatelyCaption, 'SCnProjExtBuildRunSeparatelyCaption');
+  TranslateStr(SCnProjExtBuildRunSeparatelyHint, 'SCnProjExtBuildRunSeparatelyHint');
+  TranslateStr(SCnProjExtBuildRunSeparatelyNoTarget, 'SCnProjExtBuildRunSeparatelyNoTarget');
   TranslateStr(SCnProjExtExploreUnitCaption, 'SCnProjExtExploreUnitCaption');
   TranslateStr(SCnProjExtExploreUnitHint, 'SCnProjExtExploreUnitHint');
   TranslateStr(SCnProjExtExploreProjectCaption, 'SCnProjExtExploreProjectCaption');
