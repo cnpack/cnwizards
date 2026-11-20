@@ -591,10 +591,17 @@ begin
     try
       Formatter.SliceMode := True;
       Formatter.SpecifyLineMarks(FCppInputLineMarks);
-      Formatter.FormatCode;
-      Result := Formatter.CopyMatchedSliceResult;
-      ClearCppOutputLineMarks;
-      Formatter.SaveOutputLineMarks(FCppOutputLineMarks);
+      try
+        try
+          Formatter.FormatCode;
+        except
+          ; // 出错了，先屏蔽，看看片段有无结果
+        end;
+        Result := Formatter.CopyMatchedSliceResult;
+      finally
+        ClearCppOutputLineMarks;
+        Formatter.SaveOutputLineMarks(FCppOutputLineMarks);
+      end;
     finally
       Formatter.Free;
     end;

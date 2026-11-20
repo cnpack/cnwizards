@@ -88,6 +88,10 @@ type
     FMatchedOutStartCol: Integer;
     FMatchedOutEndRow: Integer;
     FMatchedOutEndCol: Integer;
+    FLastWrittenSourcePos: Integer;  // 最后写出的非空白内容在源文件中的结束偏移，供片段模式兜底判断
+    FFallbackEndRow: Integer;        // 片段模式兜底：选区结束后第一个 Token 写出前的输出行
+    FFallbackEndCol: Integer;        // 片段模式兜底：选区结束后第一个 Token 写出前的输出列
+    FFallbackEndCaptured: Boolean;   // 是否已记录片段模式兜底结束位置
     FFirstMatchStart: Boolean;
     FFirstMatchEnd: Boolean;
     function TokenAt(Index: Integer): TCnCppToken;
@@ -179,6 +183,10 @@ begin
   FMatchedOutStartCol := CN_CPP_MATCHED_INVALID;
   FMatchedOutEndRow := CN_CPP_MATCHED_INVALID;
   FMatchedOutEndCol := CN_CPP_MATCHED_INVALID;
+  FLastWrittenSourcePos := 0;
+  FFallbackEndRow := CN_CPP_MATCHED_INVALID;
+  FFallbackEndCol := CN_CPP_MATCHED_INVALID;
+  FFallbackEndCaptured := False;
   FScanner := TCnCppScanner.Create(Stream);
   FCodeGen := TCnCppCodeGenerator.Create;
   FCodeGen.TabWidth := Rule.TabSpaceCount;
@@ -215,6 +223,10 @@ begin
   StartPos := FCurrentToken.Position;
   EndPos := StartPos + Length(FCurrentToken.Text);
 
+  // 记录最后写出的非空白内容在源文件中的结束偏移，供片段模式兜底判断
+  if not IsWriteBlank then
+    FLastWrittenSourcePos := EndPos;
+
   if (StartPos >= FMatchedInStart) and not IsWriteln and not IsWriteBlank and
     not FFirstMatchStart then
   begin
@@ -229,6 +241,16 @@ begin
     FMatchedOutEndRow := TCnCppCodeGenerator(Sender).CurrRow;
     FMatchedOutEndCol := TCnCppCodeGenerator(Sender).CurrColumn;
     FFirstMatchEnd := True;
+  end
+  else if (StartPos >= FMatchedInEnd) and not IsWriteln and not IsWriteBlank and
+    not FFirstMatchEnd and not FFallbackEndCaptured then
+  begin
+    // 选区内容已全部写出，本 Token 是选区结束后写出的第一个内容，
+    // 记下它写出前的输出位置作为兜底结束标记，供选区之后的内容
+    // 出错时仍能返回选区的结果
+    FFallbackEndRow := TCnCppCodeGenerator(Sender).PrevRow;
+    FFallbackEndCol := TCnCppCodeGenerator(Sender).PrevColumn;
+    FFallbackEndCaptured := True;
   end;
 end;
 
@@ -1593,12 +1615,43 @@ begin
   FMatchedOutStartCol := CN_CPP_MATCHED_INVALID;
   FMatchedOutEndRow := CN_CPP_MATCHED_INVALID;
   FMatchedOutEndCol := CN_CPP_MATCHED_INVALID;
+  FLastWrittenSourcePos := 0;
+  FFallbackEndRow := CN_CPP_MATCHED_INVALID;
+  FFallbackEndCol := CN_CPP_MATCHED_INVALID;
+  FFallbackEndCaptured := False;
 
+  // 先完成全部词法分析；片段模式下尾部 Token 化出错时，用已取得的 Token 继续
+  // 格式化，选区是否有完整结果由片段结束标记决定
   try
     repeat
       T := FScanner.NextToken;
       FTokens.Add(T);
     until T.Kind = ctkEOF;
+  except
+    on E: ECnCppScannerError do
+    begin
+      case E.ErrorKind of
+        csekUnclosedString:
+          SetCppScanError(CnFormatterIntf.CN_ERRCODE_CPP_UNCLOSED_STRING, E);
+        csekUnclosedBlockComment:
+          SetCppScanError(CnFormatterIntf.CN_ERRCODE_CPP_UNCLOSED_COMMENT, E);
+        csekUnclosedRawString:
+          SetCppScanError(CnFormatterIntf.CN_ERRCODE_CPP_UNCLOSED_RAW_STRING, E);
+      end;
+      if not FSliceMode then
+        raise;
+    end;
+    on E: Exception do
+    begin
+      SetCppError(CnFormatterIntf.CN_ERRCODE_CPP_FORMAT, FCurrentToken);
+      raise;
+    end;
+  end;
+
+  if FTokens.Count = 0 then
+    Exit;
+
+  try
     FormatTokens;
   except
     on E: ECnCppFormatError do
@@ -1617,7 +1670,9 @@ begin
     end;
     on E: Exception do
     begin
-      SetCppError(CnFormatterIntf.CN_ERRCODE_CPP_FORMAT, FCurrentToken);
+      // 词法阶段已记录过更具体的错误时不再覆盖
+      if CppErrorRec.ErrorCode = CN_ERRCODE_CPP_OK then
+        SetCppError(CnFormatterIntf.CN_ERRCODE_CPP_FORMAT, FCurrentToken);
       raise;
     end;
   end;
@@ -1650,11 +1705,45 @@ begin
 end;
 
 function TCnCppCodeFormatter.CopyMatchedSliceResult: string;
+var
+  EndRow, EndCol: Integer;
 begin
   Result := '';
-  if FSliceMode and HasSliceResult then
-    Result := FCodeGen.CopyPartOut(FMatchedOutStartRow, FMatchedOutStartCol,
-      FMatchedOutEndRow, FMatchedOutEndCol);
+  if not FSliceMode then
+    Exit;
+
+  if FFirstMatchStart and FFallbackEndCaptured then
+  begin
+    // 选区内容已全部写出，且已记录选区结束后第一个 Token 写出前的位置，
+    // 虽然选区之后的内容出错导致正常结束标记缺失，仍可返回选区的结果
+    EndRow := FFallbackEndRow;
+    EndCol := FFallbackEndCol;
+  end
+  else if HasSliceResult then
+  begin
+    EndRow := FMatchedOutEndRow;
+    EndCol := FMatchedOutEndCol;
+  end
+  else if FFirstMatchStart and (FLastWrittenSourcePos + 2 >= FMatchedInEnd) and
+    ((CppErrorRec.ErrorCode = CN_ERRCODE_CPP_OK) or (CppErrorRec.SourcePos >= FMatchedInEnd)) then
+  begin
+    // 选区内容已全部写出，但出错点紧跟在选区结束之后、尚未输出过换行，导致
+    // 结束标记未记录：此时当前输出的末尾就是选区的末尾。若出错 Token 起点
+    // 在选区之内（CppErrorRec.SourcePos 记录的是出错 Token 的起点），说明
+    // 选区自身未处理完整，不能返回部分内容
+    EndRow := FCodeGen.CurrRow;
+    EndCol := FCodeGen.CurrColumn;
+  end
+  else
+    Exit; // 选区自身可能存在错误，不返回不完整的内容
+
+  // CopyPartOut 的 EndColumn 是不含端点的 exclusive 语义
+  Result := TrimRight(FCodeGen.CopyPartOut(FMatchedOutStartRow, FMatchedOutStartCol,
+    EndRow, EndCol));
+
+  // 选区按行模式替换，结果末尾始终补一个回车换行
+  if Result <> '' then
+    Result := Result + #13#10;
 end;
 
 function CnFormatCppText(const Source: string; const Rule: TCnCppCodeFormatRule): string;

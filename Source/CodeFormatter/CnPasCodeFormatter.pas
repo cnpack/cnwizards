@@ -98,6 +98,10 @@ type
     FMatchedOutEndCol: Integer;
     FMatchedInEnd: Integer;
     FMatchedOutEndRow: Integer;
+    FLastWrittenSourcePos: Integer;  // 最后写出的非空白内容在源文件中的结束偏移，供片段模式兜底判断
+    FFallbackEndRow: Integer;        // 片段模式兜底：选区结束后第一个 Token 写出前的输出行
+    FFallbackEndCol: Integer;        // 片段模式兜底：选区结束后第一个 Token 写出前的输出列
+    FFallbackEndCaptured: Boolean;   // 是否已记录片段模式兜底结束位置
     FFirstMatchStart: Boolean;
     FFirstMatchEnd: Boolean;
     // 用来粗略记录当前正在格式化的点，以备输出时根据场景判断是否使用关键字规则
@@ -547,6 +551,11 @@ begin
   FMatchedOutStartCol := CN_MATCHED_INVALID;
   FMatchedOutEndRow := CN_MATCHED_INVALID;
   FMatchedOutEndCol := CN_MATCHED_INVALID;
+
+  FLastWrittenSourcePos := 0;
+  FFallbackEndRow := CN_MATCHED_INVALID;
+  FFallbackEndCol := CN_MATCHED_INVALID;
+  FFallbackEndCaptured := False;
 
   // FNamesMap := TCnStrToStrHashMap.Create; // Lazy Create
   FCodeGen := TCnCodeGenerator.Create;
@@ -6362,14 +6371,51 @@ end;
 { TCnPascalCodeFormatter }
 
 function TCnPascalCodeFormatter.CopyMatchedSliceResult: string;
+var
+  EndRow, EndCol: Integer;
 begin
   Result := '';
-  if FSliceMode and HasSliceResult then
+  if not FSliceMode then
+    Exit;
+
+  if FFirstMatchStart and FFallbackEndCaptured then
+  begin
+    // 选区内容已全部写出，且已记录选区结束后第一个 Token 写出前的位置，
+    // 虽然选区之后的内容出错导致正常结束标记缺失，仍可返回选区的结果
+    EndRow := FFallbackEndRow;
+    EndCol := FFallbackEndCol;
+  end
+  else if HasSliceResult then
   begin
     // 有匹配结果
-    Result := CodeGen.CopyPartOut(MatchedOutStartRow, MatchedOutStartCol,
-      MatchedOutEndRow, MatchedOutEndCol);
-  end;
+    EndRow := MatchedOutEndRow;
+    EndCol := MatchedOutEndCol;
+  end
+  else if FFirstMatchStart and (FLastWrittenSourcePos + 2 >= FMatchedInEnd) and
+    ((PascalErrorRec.ErrorCode = 0) or (PascalErrorRec.SourcePos >= FMatchedInEnd)) then
+  begin
+    // 选区内容已全部写出，但出错点紧跟在选区结束之后、尚未输出过换行，导致
+    // 结束标记未记录：此时当前输出的末尾就是选区的末尾。若出错 Token 起点在
+    // 选区之内（PascalErrorRec.SourcePos 记录的是出错 Token 的起点），说明选区
+    // 自身未处理完整，不能返回部分内容
+    EndRow := CodeGen.CurrRow;
+    EndCol := CodeGen.CurrColumn;
+  end
+  else
+    Exit; // 选区自身可能存在错误，不返回不完整的内容
+
+  // CopyPartOut 的 EndColumn 在单行时是含端点下标、多行时是不含端点的长度，分别转换
+  if EndRow = MatchedOutStartRow then
+    Result := TrimRight(CodeGen.CopyPartOut(MatchedOutStartRow, MatchedOutStartCol,
+      EndRow, EndCol - 1))
+  else
+    Result := TrimRight(CodeGen.CopyPartOut(MatchedOutStartRow, MatchedOutStartCol,
+      EndRow, EndCol));
+
+  // 选区按行模式替换，结果末尾始终补一个回车换行；正常路径的结果本身以回车
+  // 换行结尾，TrimRight 后统一补回单个回车换行
+  if Result <> '' then
+    Result := Result + #13#10;
 end;
 
 procedure TCnPascalCodeFormatter.FormatCode(PreSpaceCount: Byte);
@@ -6428,6 +6474,10 @@ begin
     EndPos := FScanner.SourcePos + FScanner.TokenStringLength;
   end;
 
+  // 记录最后写出的非空白内容在源文件中的结束偏移，供片段模式兜底判断
+  if not IsWriteBlank then
+    FLastWrittenSourcePos := EndPos;
+
   // 写出不属于代码本身的空行时超出标记的话不算，且在写注释前的空白时也不算
   if (StartPos >= FMatchedInStart) and not IsWriteln and not IsWriteBlank and not FFirstMatchStart then
   begin
@@ -6450,6 +6500,16 @@ begin
 {$IFDEF DEBUG}
 //    CnDebugger.LogMsg('OnAfter Write. Got MatchEnd.');
 {$ENDIF}
+  end
+  else if (StartPos >= FMatchedInEnd) and not IsWriteln and not IsWriteBlank and
+    not FFirstMatchEnd and not FFallbackEndCaptured then
+  begin
+    // 选区内容已全部写出，本 Token 是选区结束后写出的第一个内容，
+    // 记下它写出前的输出位置作为兜底结束标记。选区之后的内容出错导致
+    // 正常的结束标记（依赖换行事件）无法记录时，据此仍可返回选区的结果
+    FFallbackEndRow := TCnCodeGenerator(Sender).PrevRow;
+    FFallbackEndCol := TCnCodeGenerator(Sender).PrevColumn;
+    FFallbackEndCaptured := True;
   end;
   FPrefixSpaces := PrefixSpaces;
 end;
