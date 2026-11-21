@@ -883,8 +883,7 @@ uses
   CnDebug,
 {$ENDIF}
   Registry, CnGraphUtils {$IFNDEF LAZARUS}, CnWizNotifier {$ENDIF}
-  {$IFDEF LAZARUS}, IDEMsgIntf, IDEExternToolIntf {$ENDIF}
-  {$IFDEF BDS}, CnWizMethodHook {$ENDIF};
+  {$IFDEF LAZARUS}, IDEMsgIntf, IDEExternToolIntf {$ENDIF};
 
 const
 {$IFDEF IDE_SUPPORT_HDPI}
