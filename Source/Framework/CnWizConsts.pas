@@ -256,8 +256,8 @@ resourcestring
 
   // CnProjectExtWizard
   SCnProjExtWizard = 'CnProjectExtWizard';
-  SCnProjExtBuildAndRun = 'CnProjExtBuildAndRun';
   SCnProjExtRunSeparately = 'CnProjExtRunSeparately';
+  SCnProjExtBuildAndRun = 'CnProjExtBuildAndRun';
   SCnProjExtBuildRunSeparately = 'CnProjExtBuildRunSeparately';
   SCnProjExtExploreUnit = 'CnProjExtExploreUnit';
   SCnProjExtExploreProject = 'CnProjExtExploreProject';
@@ -1445,10 +1445,10 @@ var
   SCnProjExtWizardCaption: string = '&Project Enhancements';
   SCnProjExtWizardHint: string = 'Tools to Enhance Functions about Project';
   SCnProjExtWizardComment: string = 'Tools to Enhance Functions about Project';
-  SCnProjExtBuildAndRunCaption: string = '&Build and Run';
-  SCnProjExtBuildAndRunHint: string = 'Build Current Project and then Run it in IDE';
   SCnProjExtRunSeparatelyCaption: string = '&Run Separately From IDE';
   SCnProjExtRunSeparatelyHint: string = 'Run Separately From IDE, without Debugging';
+  SCnProjExtBuildAndRunCaption: string = '&Build and Run';
+  SCnProjExtBuildAndRunHint: string = 'Build Current Project and then Run it in IDE';
   SCnProjExtBuildRunSeparatelyCaption: string = 'Build and Run Separately from &IDE';
   SCnProjExtBuildRunSeparatelyHint: string = 'Build Current Project and then Run it Separately from IDE, without Debugging';
   SCnProjExtBuildRunSeparatelyNoTarget: string = 'Can NOT Find the Built Target, Run Separately Aborted.';

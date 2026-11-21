@@ -1099,10 +1099,10 @@ begin
   TranslateStr(SCnProjExtWizardCaption, 'SCnProjExtWizardCaption');
   TranslateStr(SCnProjExtWizardHint, 'SCnProjExtWizardHint');
   TranslateStr(SCnProjExtWizardComment, 'SCnProjExtWizardComment');
-  TranslateStr(SCnProjExtBuildAndRunCaption, 'SCnProjExtBuildAndRunCaption');
-  TranslateStr(SCnProjExtBuildAndRunHint, 'SCnProjExtBuildAndRunHint');
   TranslateStr(SCnProjExtRunSeparatelyCaption, 'SCnProjExtRunSeparatelyCaption');
   TranslateStr(SCnProjExtRunSeparatelyHint, 'SCnProjExtRunSeparatelyHint');
+  TranslateStr(SCnProjExtBuildAndRunCaption, 'SCnProjExtBuildAndRunCaption');
+  TranslateStr(SCnProjExtBuildAndRunHint, 'SCnProjExtBuildAndRunHint');
   TranslateStr(SCnProjExtBuildRunSeparatelyCaption, 'SCnProjExtBuildRunSeparatelyCaption');
   TranslateStr(SCnProjExtBuildRunSeparatelyHint, 'SCnProjExtBuildRunSeparatelyHint');
   TranslateStr(SCnProjExtBuildRunSeparatelyNoTarget, 'SCnProjExtBuildRunSeparatelyNoTarget');
