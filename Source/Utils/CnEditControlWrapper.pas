@@ -311,6 +311,9 @@ type
     FEditor2PaintLineNotifiers: TList;
     FEditor2PaintGutterNotifiers: TList;
     FEditor2PaintTextNotifiers: TList;
+    // 待检的新编辑器控件队列：SetEditView 钩子触发时 IDE 尚未登记 control->view 映射，
+    // 需延迟到空闲时检查（QueueCheckNewEditor 排队、DoPendingCheckNewEditors 消费）
+    FPendingNewEditors: TList;
 {$ENDIF}
 
     FBackgroundColor: TColor;
@@ -417,9 +420,6 @@ type
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
 {$IFDEF USE_CODEEDITOR_SERVICE}
-    // 待检的新编辑器控件队列：SetEditView 钩子触发时 IDE 尚未登记 control->view 映射，
-    // 需延迟到空闲时检查（QueueCheckNewEditor 排队、DoPendingCheckNewEditors 消费）
-    FPendingNewEditors: TList;
     procedure QueueCheckNewEditor(EditControl: TControl);
     procedure DoPendingCheckNewEditors(Sender: TObject);
 {$ENDIF}
