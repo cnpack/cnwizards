@@ -1447,9 +1447,9 @@ var
   SCnProjExtWizardComment: string = 'Tools to Enhance Functions about Project';
   SCnProjExtRunSeparatelyCaption: string = '&Run Separately From IDE';
   SCnProjExtRunSeparatelyHint: string = 'Run Separately From IDE, without Debugging';
-  SCnProjExtBuildAndRunCaption: string = '&Build and Run';
+  SCnProjExtBuildAndRunCaption: string = 'Build and Ru&n';
   SCnProjExtBuildAndRunHint: string = 'Build Current Project and then Run it in IDE';
-  SCnProjExtBuildRunSeparatelyCaption: string = 'Build and Run Separately from &IDE';
+  SCnProjExtBuildRunSeparatelyCaption: string = 'Build and Run Sep&arately from IDE';
   SCnProjExtBuildRunSeparatelyHint: string = 'Build Current Project and then Run it Separately from IDE, without Debugging';
   SCnProjExtBuildRunSeparatelyNoTarget: string = 'Can NOT Find the Built Target, Run Separately Aborted.';
   SCnProjExtExploreUnitCaption: string = 'Browse Current File''s &Dir...';
