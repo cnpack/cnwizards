@@ -4140,7 +4140,8 @@ begin
       end;
     end;
   end;
-{$ELSE}
+{$ENDIF}
+{$IFDEF DELPHI_OTA}
   {$IFDEF BDS}
   if Downwards then
     BDSNextMessageKey(VK_DOWN)
