@@ -416,6 +416,13 @@ type
 
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
 
+{$IFDEF USE_CODEEDITOR_SERVICE}
+    // 待检的新编辑器控件队列：SetEditView 钩子触发时 IDE 尚未登记 control->view 映射，
+    // 需延迟到空闲时检查（QueueCheckNewEditor 排队、DoPendingCheckNewEditors 消费）
+    FPendingNewEditors: TList;
+    procedure QueueCheckNewEditor(EditControl: TControl);
+    procedure DoPendingCheckNewEditors(Sender: TObject);
+{$ENDIF}
     procedure CheckNewEditor(EditControl: TControl {$IFDEF DELPHI_OTA}
       {$IFNDEF USE_CODEEDITOR_SERVICE}; View: IOTAEditView {$ENDIF} {$ENDIF});
     function AddEditor(EditControl: TControl; View: TCnEditViewSourceInterface): Integer;
@@ -1187,13 +1194,9 @@ begin
     IsIdeEditorForm(TCustomForm(TControl(Self).Owner)) then
   begin
 {$IFDEF USE_CODEEDITOR_SERVICE}
-    // D13.* 有 Bug，此时调 CheckNewEditor 的话，
-    // 内部直接拿到的 View 是 nil，不得不延迟拿
-    CnWizNotifierServices.ExecProcOnApplicationIdle(
-      procedure(Sender: TObject)
-      begin
-        FEditControlWrapper.CheckNewEditor(TControl(Self));
-      end);
+    // D13 起 IDE 调 SetEditView 时 control->view 映射尚未登记，GetViewForEditor 返回
+    // nil，不能同步检查；改为进入带 FreeNotification 守护与去重的待检队列，空闲时消费
+    FEditControlWrapper.QueueCheckNewEditor(TControl(Self));
 {$ELSE}
     View := GetOTAEditView(EditView);
     FEditControlWrapper.CheckNewEditor(TControl(Self), View);
@@ -1351,6 +1354,7 @@ begin
   FEditor2PaintLineNotifiers := TList.Create;
   FEditor2PaintGutterNotifiers := TList.Create;
   FEditor2PaintTextNotifiers := TList.Create;
+  FPendingNewEditors := TList.Create;
 {$ENDIF}
 
   FEditorList := TObjectList.Create;
@@ -1484,6 +1488,16 @@ begin
   CnWizClearAndFreeList(FSysKeyDownNotifiers);
   CnWizClearAndFreeList(FSysKeyUpNotifiers);
 
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  // 注销空闲回调并清空待检队列与释放守护，防止销毁后仍被回调或回调已销毁对象
+  CnWizNotifierServices.StopExecuteOnApplicationIdle(DoPendingCheckNewEditors);
+  while FPendingNewEditors.Count > 0 do
+  begin
+    TControlHack(FPendingNewEditors[FPendingNewEditors.Count - 1]).RemoveFreeNotification(Self);
+    FPendingNewEditors.Delete(FPendingNewEditors.Count - 1);
+  end;
+  FPendingNewEditors.Free;
+{$ENDIF}
   FCmpLines.Free;
   inherited;
 end;
@@ -3006,6 +3020,14 @@ procedure TCnEditControlWrapper.Notification(AComponent: TComponent;
   Operation: TOperation);
 begin
   inherited;
+{$IFDEF USE_CODEEDITOR_SERVICE}
+  if (Operation = opRemove) and (FPendingNewEditors <> nil) and
+    (FPendingNewEditors.IndexOf(AComponent) >= 0) then
+  begin
+    // 待检控件已释放：先摘出队列，保证空闲时消费到的控件必然存活
+    FPendingNewEditors.Remove(AComponent);
+  end;
+{$ENDIF}
   if IsEditControl(AComponent) and (Operation = opRemove) then
   begin
   {$IFDEF DEBUG}
@@ -3015,6 +3037,38 @@ begin
     DeleteEditor(TControl(AComponent));
   end;
 end;
+
+{$IFDEF USE_CODEEDITOR_SERVICE}
+
+// SetEditView 钩子触发时 IDE 尚未登记 control->view 映射（D13 起 GetViewForEditor
+// 返回 nil），故将检查排队至空闲时执行；控件经 FreeNotification 守护，释放即摘出
+procedure TCnEditControlWrapper.QueueCheckNewEditor(EditControl: TControl);
+begin
+  if (EditControl = nil) or (csDestroying in TControlHack(EditControl).ComponentState) or
+    (FPendingNewEditors.IndexOf(EditControl) >= 0) then
+    Exit;
+  EditControl.FreeNotification(Self);
+  FPendingNewEditors.Add(EditControl);
+  CnWizNotifierServices.ExecuteOnApplicationIdle(DoPendingCheckNewEditors);
+end;
+
+// 空闲时消费待检队列；剩余项先续期再处理，单项异常不影响后续项
+procedure TCnEditControlWrapper.DoPendingCheckNewEditors(Sender: TObject);
+var
+  EditControl: TControl;
+begin
+  while FPendingNewEditors.Count > 0 do
+  begin
+    EditControl := TControl(FPendingNewEditors[FPendingNewEditors.Count - 1]);
+    FPendingNewEditors.Delete(FPendingNewEditors.Count - 1);
+    if FPendingNewEditors.Count > 0 then
+      CnWizNotifierServices.ExecuteOnApplicationIdle(DoPendingCheckNewEditors);
+    // opRemove 通知会把已释放控件摘出队列，此处取出的控件必然存活
+    CheckNewEditor(EditControl);
+  end;
+end;
+
+{$ENDIF}
 
 procedure TCnEditControlWrapper.EditControlProc(EditWindow: TCustomForm;
   EditControl: TControl; Context: Pointer);
